@@ -1,4 +1,4 @@
-from _LinkedList import ListNode, printasList
+from solutions._LinkedList import ListNode, printasList
 
 def reverseList(head):
     prev = None
