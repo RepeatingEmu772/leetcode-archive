@@ -1,4 +1,4 @@
-def dailyTemperatures(temperatures):
+def dailyTemperatures_unrevised(temperatures):
     wait = [0] * len(temperatures)
     stack = [] # holds pairs [temp, idx]
 
@@ -28,6 +28,22 @@ def dailyTemperatures_slow(temperatures):
         wait.append(count)
 
     return wait
+
+def dailyTemperatures(temperatures):
+    wait = [0] * len(temperatures)
+    stack = [] #monotonic stack -> tuple (i, temp)
+
+    for i, temp in enumerate(temperatures):
+        # print(f"stack: {stack}")
+
+        while stack and temp > stack[-1][1]:
+            prev_i, prev_temp = stack.pop()
+            wait[prev_i] = i - prev_i
+        
+        stack.append((i, temp))
+
+    return wait
+
 
 
 print(dailyTemperatures([73,74,75,71,69,72,76,73]))
