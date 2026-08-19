@@ -62,7 +62,6 @@ def mergeKLists(lists):
 
     return lists[0]
 
-
 l1 = ListNode(1, ListNode(4, ListNode(5, None)))
 l2 = ListNode(1, ListNode(3, ListNode(4, None)))
 l3 = ListNode(2, ListNode(6))
