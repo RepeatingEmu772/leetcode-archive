@@ -1,4 +1,4 @@
-def minSubArrayLen(target, nums):
+def minSubArrayLen_old(target, nums):
     min_len = 10**100
     curr_sum = nums[0]
 
@@ -35,9 +35,34 @@ def minSubArrayLen(target, nums):
 
     return 0 if min_len == 10**100 else min_len
 
+def minSubArrayLen(target, nums):
 
-# print(minSubArrayLen(4, [1, 4, 4]))
-# print(minSubArrayLen(7, [2,3,1,2,4,3]))
+    min_len = float("inf")
+    start = stop = curr_sum = 0
+
+    if nums[0] >= target:
+        return 1
+
+    while stop < len(nums):
+        # print(f"start: {start}, Stop: {stop}, curr_sum: {curr_sum}, min_len: {min_len}")
+
+        curr_sum += nums[stop]
+
+        while curr_sum >= target:
+            # print(f"curr_sum: {curr_sum}, min_len: {min_len}")
+            curr_len = stop - start + 1
+            min_len = min(curr_len, min_len)
+
+            curr_sum -= nums[start]
+            start += 1
+
+        stop += 1
+
+    return 0 if min_len == float("inf") else min_len 
+
+
+print(minSubArrayLen(4, [1, 4, 4]))
+print(minSubArrayLen(7, [2,3,1,2,4,3]))
 print(minSubArrayLen(11, [1,2,3,4,5]))
 
 
