@@ -1,4 +1,24 @@
 def removeDuplicates(s, k):
+    stack = [] # [char, count]
+
+    for ch in s:
+
+        if stack and stack[-1][0] == ch:
+            stack[-1][1] += 1 
+
+        else:
+            stack.append([ch, 1])
+        # print(f"c: {ch}, stack: {stack}")
+
+        if stack[-1][1] == k:
+            # print(f"popping {ch}")
+
+            stack.pop()
+
+    return "".join([char*count for char, count in stack])
+
+
+def removeDuplicates_fat(s, k):
     stack = []
 
     for c in s:
