@@ -1,4 +1,20 @@
 def search(nums, target):
+    low, high = 0, len(nums) - 1
+
+    while low <= high:
+        mid = low + ((high - low) // 2)
+
+        if nums[mid] < target:
+            low = mid + 1
+        elif nums[mid] > target:
+            high = mid -1
+
+        else:
+            return mid
+    return -1
+
+
+def search_o(nums, target):
     return search_recursive(nums, 0, len(nums) - 1, target)
 
 def search_recursive(nums, low, high, target):

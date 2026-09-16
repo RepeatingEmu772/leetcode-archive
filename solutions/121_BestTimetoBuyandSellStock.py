@@ -1,4 +1,23 @@
 def maxProfit(prices):
+    left = 0
+    right = 1
+
+    maxprofit = 0
+
+    while right < len(prices):
+        curr_profit = prices[right] - prices[left]
+
+        if prices[left] < prices[right] :
+            maxprofit = max(curr_profit, maxprofit)
+
+        else:
+            left = right
+        right += 1
+            
+         
+    return maxprofit
+
+def maxProfit_o(prices):
     max_profit = 0
     
     #edge case, only 1 day or 2 day prices given 
