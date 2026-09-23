@@ -1,0 +1,432 @@
+[
+  {
+    "name": "empty stream",
+    "part": 1,
+    "input": {
+      "merchants": {
+        "m1": "retail"
+      },
+      "thresholds": {
+        "retail": "2"
+      },
+      "min_charges": 1,
+      "fraud_codes": [
+        "bad"
+      ],
+      "safe_codes": [
+        "ok"
+      ],
+      "events": []
+    },
+    "expected": []
+  },
+  {
+    "name": "inclusive count",
+    "part": 1,
+    "input": {
+      "merchants": {
+        "m1": "retail"
+      },
+      "thresholds": {
+        "retail": "2"
+      },
+      "min_charges": 1,
+      "fraud_codes": [
+        "bad"
+      ],
+      "safe_codes": [
+        "ok"
+      ],
+      "events": [
+        "CHARGE,a,m1,bad",
+        "CHARGE,b,m1,bad"
+      ]
+    },
+    "expected": [
+      "m1"
+    ]
+  },
+  {
+    "name": "minimum count gates zero threshold",
+    "part": 1,
+    "input": {
+      "merchants": {
+        "m1": "retail"
+      },
+      "thresholds": {
+        "retail": "0"
+      },
+      "min_charges": 2,
+      "fraud_codes": [
+        "bad"
+      ],
+      "safe_codes": [
+        "ok"
+      ],
+      "events": [
+        "CHARGE,a,m1,ok"
+      ]
+    },
+    "expected": []
+  },
+  {
+    "name": "duplicates and invalid IDs",
+    "part": 1,
+    "input": {
+      "merchants": {
+        "m1": "retail"
+      },
+      "thresholds": {
+        "retail": "2"
+      },
+      "min_charges": 1,
+      "fraud_codes": [
+        "bad"
+      ],
+      "safe_codes": [
+        "ok"
+      ],
+      "events": [
+        "CHARGE,a,unknown,bad",
+        "CHARGE,a,m1,bad",
+        "CHARGE,a,m1,bad",
+        "CHARGE,b,m1,unlisted",
+        "CHARGE,,m1,bad"
+      ]
+    },
+    "expected": []
+  },
+  {
+    "name": "sorted output",
+    "part": 1,
+    "input": {
+      "merchants": {
+        "z": "retail",
+        "a": "retail"
+      },
+      "thresholds": {
+        "retail": "1"
+      },
+      "min_charges": 1,
+      "fraud_codes": [
+        "bad"
+      ],
+      "safe_codes": [
+        "ok"
+      ],
+      "events": [
+        "CHARGE,a,z,bad",
+        "CHARGE,b,a,bad"
+      ]
+    },
+    "expected": [
+      "a",
+      "z"
+    ]
+  },
+  {
+    "name": "disputes ignored",
+    "part": 1,
+    "input": {
+      "merchants": {
+        "m1": "retail"
+      },
+      "thresholds": {
+        "retail": "1"
+      },
+      "min_charges": 1,
+      "fraud_codes": [
+        "bad"
+      ],
+      "safe_codes": [
+        "ok"
+      ],
+      "events": [
+        "CHARGE,a,m1,bad",
+        "DISPUTE,a"
+      ]
+    },
+    "expected": [
+      "m1"
+    ]
+  },
+  {
+    "name": "exact decimal boundary",
+    "part": 2,
+    "input": {
+      "merchants": {
+        "m1": "retail"
+      },
+      "thresholds": {
+        "retail": "0.5"
+      },
+      "min_charges": 1,
+      "fraud_codes": [
+        "bad"
+      ],
+      "safe_codes": [
+        "ok"
+      ],
+      "events": [
+        "CHARGE,a,m1,bad",
+        "CHARGE,b,m1,ok"
+      ]
+    },
+    "expected": [
+      "m1"
+    ]
+  },
+  {
+    "name": "below ratio",
+    "part": 2,
+    "input": {
+      "merchants": {
+        "m1": "retail"
+      },
+      "thresholds": {
+        "retail": "0.5"
+      },
+      "min_charges": 1,
+      "fraud_codes": [
+        "bad"
+      ],
+      "safe_codes": [
+        "ok"
+      ],
+      "events": [
+        "CHARGE,a,m1,bad",
+        "CHARGE,b,m1,ok",
+        "CHARGE,c,m1,ok"
+      ]
+    },
+    "expected": []
+  },
+  {
+    "name": "integer one is count",
+    "part": 2,
+    "input": {
+      "merchants": {
+        "m1": "retail"
+      },
+      "thresholds": {
+        "retail": "1"
+      },
+      "min_charges": 1,
+      "fraud_codes": [
+        "bad"
+      ],
+      "safe_codes": [
+        "ok"
+      ],
+      "events": [
+        "CHARGE,a,m1,bad",
+        "CHARGE,b,m1,ok"
+      ]
+    },
+    "expected": [
+      "m1"
+    ]
+  },
+  {
+    "name": "decimal one means all",
+    "part": 2,
+    "input": {
+      "merchants": {
+        "m1": "retail"
+      },
+      "thresholds": {
+        "retail": "1.0"
+      },
+      "min_charges": 1,
+      "fraud_codes": [
+        "bad"
+      ],
+      "safe_codes": [
+        "ok"
+      ],
+      "events": [
+        "CHARGE,a,m1,bad",
+        "CHARGE,b,m1,ok"
+      ]
+    },
+    "expected": []
+  },
+  {
+    "name": "zero ratio still needs minimum",
+    "part": 2,
+    "input": {
+      "merchants": {
+        "m1": "retail"
+      },
+      "thresholds": {
+        "retail": "0.0"
+      },
+      "min_charges": 1,
+      "fraud_codes": [
+        "bad"
+      ],
+      "safe_codes": [
+        "ok"
+      ],
+      "events": []
+    },
+    "expected": []
+  },
+  {
+    "name": "dispute removes fraud",
+    "part": 3,
+    "input": {
+      "merchants": {
+        "m1": "retail"
+      },
+      "thresholds": {
+        "retail": "0.5"
+      },
+      "min_charges": 1,
+      "fraud_codes": [
+        "bad"
+      ],
+      "safe_codes": [
+        "ok"
+      ],
+      "events": [
+        "CHARGE,a,m1,bad",
+        "CHARGE,b,m1,ok",
+        "DISPUTE,a"
+      ]
+    },
+    "expected": []
+  },
+  {
+    "name": "repeat dispute cannot double subtract",
+    "part": 3,
+    "input": {
+      "merchants": {
+        "m1": "retail"
+      },
+      "thresholds": {
+        "retail": "0.5"
+      },
+      "min_charges": 1,
+      "fraud_codes": [
+        "bad"
+      ],
+      "safe_codes": [
+        "ok"
+      ],
+      "events": [
+        "CHARGE,a,m1,bad",
+        "CHARGE,b,m1,bad",
+        "DISPUTE,a",
+        "DISPUTE,a"
+      ]
+    },
+    "expected": [
+      "m1"
+    ]
+  },
+  {
+    "name": "early dispute not queued",
+    "part": 3,
+    "input": {
+      "merchants": {
+        "m1": "retail"
+      },
+      "thresholds": {
+        "retail": "1"
+      },
+      "min_charges": 1,
+      "fraud_codes": [
+        "bad"
+      ],
+      "safe_codes": [
+        "ok"
+      ],
+      "events": [
+        "DISPUTE,a",
+        "CHARGE,a,m1,bad"
+      ]
+    },
+    "expected": [
+      "m1"
+    ]
+  },
+  {
+    "name": "safe dispute preserves denominator",
+    "part": 3,
+    "input": {
+      "merchants": {
+        "m1": "retail"
+      },
+      "thresholds": {
+        "retail": "1.0"
+      },
+      "min_charges": 1,
+      "fraud_codes": [
+        "bad"
+      ],
+      "safe_codes": [
+        "ok"
+      ],
+      "events": [
+        "CHARGE,a,m1,bad",
+        "CHARGE,b,m1,ok",
+        "DISPUTE,b"
+      ]
+    },
+    "expected": []
+  },
+  {
+    "name": "whitespace and malformed events",
+    "part": 3,
+    "input": {
+      "merchants": {
+        "m1": "retail"
+      },
+      "thresholds": {
+        "retail": "1"
+      },
+      "min_charges": 1,
+      "fraud_codes": [
+        "bad"
+      ],
+      "safe_codes": [
+        "ok"
+      ],
+      "events": [
+        " CHARGE , a , m1 , bad ",
+        "DISPUTE,a,extra",
+        "BOGUS,a",
+        "CHARGE,b,m1,bad,extra"
+      ]
+    },
+    "expected": [
+      "m1"
+    ]
+  },
+  {
+    "name": "final ratio can fall",
+    "part": 3,
+    "input": {
+      "merchants": {
+        "m1": "retail"
+      },
+      "thresholds": {
+        "retail": "0.5"
+      },
+      "min_charges": 1,
+      "fraud_codes": [
+        "bad"
+      ],
+      "safe_codes": [
+        "ok"
+      ],
+      "events": [
+        "CHARGE,a,m1,bad",
+        "CHARGE,b,m1,ok",
+        "CHARGE,c,m1,ok"
+      ]
+    },
+    "expected": []
+  }
+]

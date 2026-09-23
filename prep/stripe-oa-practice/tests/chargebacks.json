@@ -1,0 +1,248 @@
+[
+  {
+    "name": "no files",
+    "part": 1,
+    "input": {
+      "files": []
+    },
+    "expected": []
+  },
+  {
+    "name": "normalize and sort",
+    "part": 1,
+    "input": {
+      "files": [
+        {
+          "network": "visa",
+          "date": "2026-01-01",
+          "contents": "transaction_id,merchant_id,amount,currency,reason\nt2,m2,0200,USD,fraud\nt1,m1,50,JPY,duplicate"
+        }
+      ]
+    },
+    "expected": [
+      "visa,t1,m1,50,JPY,duplicate",
+      "visa,t2,m2,200,USD,fraud"
+    ]
+  },
+  {
+    "name": "network is part of key",
+    "part": 1,
+    "input": {
+      "files": [
+        {
+          "network": "visa",
+          "date": "2026-01-01",
+          "contents": "transaction_id,merchant_id,amount,currency,reason\nt1,m1,10,USD,fraud"
+        },
+        {
+          "network": "amex",
+          "date": "2026-01-01",
+          "contents": "transaction_id,merchant_id,amount,currency,reason\nt1,m2,20,EUR,duplicate"
+        }
+      ]
+    },
+    "expected": [
+      "amex,t1,m2,20,EUR,duplicate",
+      "visa,t1,m1,10,USD,fraud"
+    ]
+  },
+  {
+    "name": "quoted fields and blank lines",
+    "part": 1,
+    "input": {
+      "files": [
+        {
+          "network": "visa",
+          "date": "2026-01-01",
+          "contents": "transaction_id,merchant_id,amount,currency,reason\n\n\"t1\", m1 , 001 , USD , fraud\n\n"
+        }
+      ]
+    },
+    "expected": [
+      "visa,t1,m1,1,USD,fraud"
+    ]
+  },
+  {
+    "name": "bad amounts",
+    "part": 2,
+    "input": {
+      "files": [
+        {
+          "network": "visa",
+          "date": "2026-01-01",
+          "contents": "transaction_id,merchant_id,amount,currency,reason\na,m,0,USD,fraud\nb,m,-1,USD,fraud\nc,m,1.5,USD,fraud\nd,m,+2,USD,fraud\ne,m,1e2,USD,fraud\nf,m,\uff11\uff10,USD,fraud\ng,m,0010,USD,fraud"
+        }
+      ]
+    },
+    "expected": [
+      "visa,g,m,10,USD,fraud"
+    ]
+  },
+  {
+    "name": "bad fields",
+    "part": 2,
+    "input": {
+      "files": [
+        {
+          "network": "visa",
+          "date": "2026-01-01",
+          "contents": "transaction_id,merchant_id,amount,currency,reason\na,m,1,GBP,fraud\nb,m,1,usd,fraud\nc,m,1,USD,other\nd,m,1,USD\ne,m,1,USD,fraud,extra\n,m,1,USD,fraud\nf,!,1,USD,fraud"
+        }
+      ]
+    },
+    "expected": []
+  },
+  {
+    "name": "malformed quoting does not consume next row",
+    "part": 2,
+    "input": {
+      "files": [
+        {
+          "network": "visa",
+          "date": "2026-01-01",
+          "contents": "transaction_id,merchant_id,amount,currency,reason\n\"unfinished,m,1,USD,fraud\nok,m,1,USD,fraud"
+        }
+      ]
+    },
+    "expected": [
+      "visa,ok,m,1,USD,fraud"
+    ]
+  },
+  {
+    "name": "quoted comma in ID is invalid",
+    "part": 2,
+    "input": {
+      "files": [
+        {
+          "network": "visa",
+          "date": "2026-01-01",
+          "contents": "transaction_id,merchant_id,amount,currency,reason\n\"a,b\",m,1,USD,fraud\nz,m,2,USD,duplicate"
+        }
+      ]
+    },
+    "expected": [
+      "visa,z,m,2,USD,duplicate"
+    ]
+  },
+  {
+    "name": "withdrawal unsupported",
+    "part": 2,
+    "input": {
+      "files": [
+        {
+          "network": "visa",
+          "date": "2026-01-01",
+          "contents": "transaction_id,merchant_id,amount,currency,reason\na,m,1,USD,withdrawn"
+        }
+      ]
+    },
+    "expected": []
+  },
+  {
+    "name": "sort dates before withdrawal",
+    "part": 3,
+    "input": {
+      "files": [
+        {
+          "network": "visa",
+          "date": "2026-01-03",
+          "contents": "transaction_id,merchant_id,amount,currency,reason\nt,m,1,USD,withdrawn"
+        },
+        {
+          "network": "visa",
+          "date": "2026-01-01",
+          "contents": "transaction_id,merchant_id,amount,currency,reason\nt,m,1,USD,fraud"
+        }
+      ]
+    },
+    "expected": []
+  },
+  {
+    "name": "replacement and reopening",
+    "part": 3,
+    "input": {
+      "files": [
+        {
+          "network": "visa",
+          "date": "2026-01-01",
+          "contents": "transaction_id,merchant_id,amount,currency,reason\nt,m,1,USD,fraud\nt,m,1,USD,withdrawn\nt,m2,15,EUR,duplicate"
+        }
+      ]
+    },
+    "expected": [
+      "visa,t,m2,15,EUR,duplicate"
+    ]
+  },
+  {
+    "name": "invalid withdrawal has no effect",
+    "part": 3,
+    "input": {
+      "files": [
+        {
+          "network": "visa",
+          "date": "2026-01-01",
+          "contents": "transaction_id,merchant_id,amount,currency,reason\nt,m,10,USD,fraud\nt,m,0,USD,withdrawn"
+        }
+      ]
+    },
+    "expected": [
+      "visa,t,m,10,USD,fraud"
+    ]
+  },
+  {
+    "name": "withdrawal scoped by network",
+    "part": 3,
+    "input": {
+      "files": [
+        {
+          "network": "visa",
+          "date": "2026-01-01",
+          "contents": "transaction_id,merchant_id,amount,currency,reason\nt,m,1,USD,fraud"
+        },
+        {
+          "network": "amex",
+          "date": "2026-01-01",
+          "contents": "transaction_id,merchant_id,amount,currency,reason\nt,m,1,USD,withdrawn"
+        }
+      ]
+    },
+    "expected": [
+      "visa,t,m,1,USD,fraud"
+    ]
+  },
+  {
+    "name": "same date respects file order",
+    "part": 3,
+    "input": {
+      "files": [
+        {
+          "network": "visa",
+          "date": "2026-01-01",
+          "contents": "transaction_id,merchant_id,amount,currency,reason\nt,m,1,USD,fraud"
+        },
+        {
+          "network": "visa",
+          "date": "2026-01-01",
+          "contents": "transaction_id,merchant_id,amount,currency,reason\nt,m,2,USD,duplicate"
+        }
+      ]
+    },
+    "expected": [
+      "visa,t,m,2,USD,duplicate"
+    ]
+  },
+  {
+    "name": "unknown withdrawal and differing details",
+    "part": 3,
+    "input": {
+      "files": [
+        {
+          "network": "visa",
+          "date": "2026-01-01",
+          "contents": "transaction_id,merchant_id,amount,currency,reason\nx,m,1,USD,withdrawn\nt,m,5,USD,fraud\nt,other,99,JPY,withdrawn"
+        }
+      ]
+    },
+    "expected": []
+  }
+]

@@ -1,0 +1,41 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Practice current exercise",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/run.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "${input:exercise}",
+        "--part",
+        "${input:part}"
+      ],
+      "justMyCode": true
+    }
+  ],
+  "inputs": [
+    {
+      "id": "exercise",
+      "type": "pickString",
+      "description": "Exercise",
+      "options": [
+        "fraud",
+        "chargebacks",
+        "payments"
+      ]
+    },
+    {
+      "id": "part",
+      "type": "pickString",
+      "description": "Stage",
+      "options": [
+        "1",
+        "2",
+        "3"
+      ]
+    }
+  ]
+}

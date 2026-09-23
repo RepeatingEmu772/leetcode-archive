@@ -1,0 +1,295 @@
+[
+  {
+    "name": "empty",
+    "part": 1,
+    "input": {
+      "commands": []
+    },
+    "expected": []
+  },
+  {
+    "name": "basic credit",
+    "part": 1,
+    "input": {
+      "commands": [
+        "ACCOUNT shop 10",
+        "CREATE p1 shop 90",
+        "SUBMIT p1",
+        "SETTLE p1"
+      ]
+    },
+    "expected": [
+      "shop 100"
+    ]
+  },
+  {
+    "name": "settle only after submit",
+    "part": 1,
+    "input": {
+      "commands": [
+        "ACCOUNT a 0",
+        "CREATE p a 10",
+        "SETTLE p"
+      ]
+    },
+    "expected": [
+      "a 0"
+    ]
+  },
+  {
+    "name": "repeat settlement",
+    "part": 1,
+    "input": {
+      "commands": [
+        "ACCOUNT shop 10",
+        "CREATE p1 shop 90",
+        "SUBMIT p1",
+        "SETTLE p1",
+        "SETTLE p1",
+        "SUBMIT p1",
+        "SETTLE p1"
+      ]
+    },
+    "expected": [
+      "shop 100"
+    ]
+  },
+  {
+    "name": "invalid create does not reserve",
+    "part": 1,
+    "input": {
+      "commands": [
+        "CREATE p missing 10",
+        "ACCOUNT a 0",
+        "CREATE p a 10",
+        "CREATE p a 50",
+        "SUBMIT p",
+        "SETTLE p"
+      ]
+    },
+    "expected": [
+      "a 10"
+    ]
+  },
+  {
+    "name": "duplicates and sorted accounts",
+    "part": 1,
+    "input": {
+      "commands": [
+        "ACCOUNT z 4",
+        "ACCOUNT a 0",
+        "ACCOUNT z 99"
+      ]
+    },
+    "expected": [
+      "a 0",
+      "z 4"
+    ]
+  },
+  {
+    "name": "invalid numbers and arity",
+    "part": 1,
+    "input": {
+      "commands": [
+        "ACCOUNT a -1",
+        "ACCOUNT a +1",
+        "ACCOUNT a 0 extra",
+        "ACCOUNT a 0",
+        "CREATE p a 0",
+        "CREATE p a 1.0",
+        "CREATE p a \uff15",
+        "SETTLE absent"
+      ]
+    },
+    "expected": [
+      "a 0"
+    ]
+  },
+  {
+    "name": "refund once",
+    "part": 2,
+    "input": {
+      "commands": [
+        "ACCOUNT shop 10",
+        "CREATE p1 shop 90",
+        "SUBMIT p1",
+        "SETTLE p1",
+        "REFUND p1",
+        "REFUND p1",
+        "SUBMIT p1",
+        "SETTLE p1"
+      ]
+    },
+    "expected": [
+      "shop 10"
+    ]
+  },
+  {
+    "name": "update only new",
+    "part": 2,
+    "input": {
+      "commands": [
+        "ACCOUNT a 0",
+        "CREATE p a 5",
+        "UPDATE p 20",
+        "SUBMIT p",
+        "UPDATE p 100",
+        "SETTLE p"
+      ]
+    },
+    "expected": [
+      "a 20"
+    ]
+  },
+  {
+    "name": "retry then update",
+    "part": 2,
+    "input": {
+      "commands": [
+        "ACCOUNT a 0",
+        "CREATE p a 5",
+        "SUBMIT p",
+        "RETRY p",
+        "UPDATE p 30",
+        "SUBMIT p",
+        "SETTLE p"
+      ]
+    },
+    "expected": [
+      "a 30"
+    ]
+  },
+  {
+    "name": "premature refund and invalid update",
+    "part": 2,
+    "input": {
+      "commands": [
+        "ACCOUNT a 0",
+        "CREATE p a 5",
+        "REFUND p",
+        "UPDATE p 0",
+        "SUBMIT p",
+        "SETTLE p",
+        "RETRY p"
+      ]
+    },
+    "expected": [
+      "a 5"
+    ]
+  },
+  {
+    "name": "inclusive deadline",
+    "part": 3,
+    "input": {
+      "commands": [
+        "10 ACCOUNT a 0 5",
+        "11 CREATE p a 100",
+        "12 SUBMIT p",
+        "20 SETTLE p",
+        "25 REFUND p"
+      ]
+    },
+    "expected": [
+      "a 0"
+    ]
+  },
+  {
+    "name": "expired deadline",
+    "part": 3,
+    "input": {
+      "commands": [
+        "10 ACCOUNT a 0 5",
+        "11 CREATE p a 100",
+        "12 SUBMIT p",
+        "20 SETTLE p",
+        "26 REFUND p"
+      ]
+    },
+    "expected": [
+      "a 100"
+    ]
+  },
+  {
+    "name": "zero disables even immediate",
+    "part": 3,
+    "input": {
+      "commands": [
+        "10 ACCOUNT a 0 0",
+        "11 CREATE p a 100",
+        "12 SUBMIT p",
+        "20 SETTLE p",
+        "20 REFUND p"
+      ]
+    },
+    "expected": [
+      "a 100"
+    ]
+  },
+  {
+    "name": "unlimited window",
+    "part": 3,
+    "input": {
+      "commands": [
+        "10 ACCOUNT a 0",
+        "11 CREATE p a 100",
+        "12 SUBMIT p",
+        "20 SETTLE p",
+        "1000000 REFUND p"
+      ]
+    },
+    "expected": [
+      "a 0"
+    ]
+  },
+  {
+    "name": "clock starts at settlement",
+    "part": 3,
+    "input": {
+      "commands": [
+        "10 ACCOUNT a 0 1",
+        "11 CREATE p a 100",
+        "12 SUBMIT p",
+        "20 SETTLE p",
+        "21 REFUND p"
+      ]
+    },
+    "expected": [
+      "a 0"
+    ]
+  },
+  {
+    "name": "same timestamp preserves order",
+    "part": 3,
+    "input": {
+      "commands": [
+        "0 ACCOUNT a 0 1",
+        "0 CREATE p a 10",
+        "0 SETTLE p",
+        "0 SUBMIT p",
+        "0 SETTLE p",
+        "0 REFUND p",
+        "0 REFUND p"
+      ]
+    },
+    "expected": [
+      "a 0"
+    ]
+  },
+  {
+    "name": "invalid timestamp and window",
+    "part": 3,
+    "input": {
+      "commands": [
+        "ACCOUNT a 0",
+        "bad ACCOUNT a 0",
+        "0 ACCOUNT a 0 -1",
+        "1 ACCOUNT a 7",
+        "2 CREATE p a 10 extra",
+        "3 REFUND p"
+      ]
+    },
+    "expected": [
+      "a 7"
+    ]
+  }
+]
