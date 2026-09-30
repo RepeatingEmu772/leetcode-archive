@@ -1,4 +1,23 @@
 def merge(intervals):
+    new_intervals = []
+    i = 1
+
+    intervals.sort()
+    print(intervals)
+    new_intervals.append(intervals[0])
+
+    while i < len(intervals):
+        last_added = new_intervals[-1]
+
+        if last_added[1] < intervals[i][0]:
+            new_intervals.append(intervals[i])
+        else:
+            last_added[1] = max(last_added[1], intervals[i][1])
+        i += 1
+    return new_intervals
+
+
+def merge_old(intervals):
     intervals.sort()
 
     merged = []

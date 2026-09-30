@@ -1,4 +1,4 @@
-def subarraySum(self, nums: List[int], k: int) -> int:
+def subarraySum(nums, k):
     prefix_map = {0: 1}
     prefix_sum = 0
     total = 0
@@ -6,7 +6,7 @@ def subarraySum(self, nums: List[int], k: int) -> int:
     for num in nums:
         prefix_sum += num
 
-        # print(f"num: {num}, prefix_sum: {prefix_sum}") 
+        print(f"num: {num}, prefix_sum: {prefix_sum}, map: {prefix_map}") 
         needed = prefix_sum - k
         if needed in prefix_map:
             total += prefix_map[needed]
